@@ -448,12 +448,31 @@ var resizePizzas = function(size) {
     return dx;
   }
 
+  /* OLD CODE:
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
       var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
       var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
       document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+    }
+  }
+  */
+
+  /* EDIT: This avoids FSL.  */
+
+  // Get all 100 random pizza containers.
+  var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
+
+  // Determine new width using 1 element from randomPizzas.  
+  // They all have the same width, so that is ok.
+  var dx = determineDx(randomPizzas[1], size);
+  var newwidth = (randomPizzas[1].offsetWidth + dx) + 'px';
+
+  // Now loop through all the randomPizzas and reset their width.
+  function changePizzaSizes(size) {
+    for (var i = 0; i < randomPizzas.length; i++) {
+      randomPizzas[i].style.width = newwidth;
     }
   }
 
@@ -502,9 +521,14 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
+  // EDIT: moved scrolltop calculation out of for loop.
+  // Removed FSL upon scrolling and load of page.
+
   var items = document.querySelectorAll('.mover');
+  var scrollTop = document.body.scrollTop / 1250;
+
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    var phase = Math.sin(scrollTop + (i % 5));
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
 
