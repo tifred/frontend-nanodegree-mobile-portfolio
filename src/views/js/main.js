@@ -279,7 +279,7 @@ function getNoun(y) {
       "quasar", "blackHole", "warpDrive", "laser", "orbit", "gears", "molecule", "electron", "neutrino", "proton", "experiment", "photon", "apparatus",
       "universe", "gravity", "darkMatter", "constellation", "circuit", "asteroid"];
       return scifi_default;
-  } 
+  }
 }
 
 var adjectives = ["dark", "color", "whimsical", "shiny", "noise", "apocalyptic", "insulting", "praise", "scientific"];  // types of adjectives for pizza titles
@@ -399,7 +399,7 @@ var pizzaElementGenerator = function(i) {
 };
 
 // resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
-var resizePizzas = function(size) { 
+var resizePizzas = function(size) {
   window.performance.mark("mark_start_resize");   // User Timing API function
 
   // Changes the value for the size of the pizza above the slider
@@ -427,7 +427,6 @@ var resizePizzas = function(size) {
     var windowwidth = document.querySelector("#randomPizzas").offsetWidth;
     var oldsize = oldwidth / windowwidth;
 
-    // TODO: change to 3 sizes? no more xl?
     // Changes the slider value to a percent width
     function sizeSwitcher (size) {
       switch(size) {
@@ -448,7 +447,8 @@ var resizePizzas = function(size) {
     return dx;
   }
 
-  /* OLD CODE:
+  /* START ORIGINAL CODE:
+
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
@@ -457,15 +457,16 @@ var resizePizzas = function(size) {
       document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
     }
   }
-  */
+  */ END ORIGINAL CODE
 
-  /* EDIT: This avoids FSL.  */
+  /* START OPTIMIZATION */
 
   // Get all 100 random pizza containers.
+  // They will be looped through shortly.
   var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
 
-  // Determine new width using 1 element from randomPizzas.  
-  // They all have the same width, so that is ok.
+  // Determine new width using 1 element from randomPizzas.
+  // They all have the same width, so one sample is enough.
   var dx = determineDx(randomPizzas[1], size);
   var newwidth = (randomPizzas[1].offsetWidth + dx) + 'px';
 
@@ -475,6 +476,7 @@ var resizePizzas = function(size) {
       randomPizzas[i].style.width = newwidth;
     }
   }
+  /* END OPTIMIZATION */
 
   changePizzaSizes(size);
 
@@ -521,8 +523,10 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  // EDIT: moved scrolltop calculation out of for loop.
-  // Removed FSL upon scrolling and load of page.
+  /* START OPTIMIZATION */
+
+  // Moved scrolltop calculation out of for loop.
+  // This eliminated FSL upon scrolling the page and loading the page.
 
   var items = document.querySelectorAll('.mover');
   var scrollTop = document.body.scrollTop / 1250;
@@ -531,6 +535,8 @@ function updatePositions() {
     var phase = Math.sin(scrollTop + (i % 5));
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
+
+  /* END OPTIMIZATION */
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
