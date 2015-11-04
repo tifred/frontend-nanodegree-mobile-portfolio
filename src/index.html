@@ -51,9 +51,16 @@
 	border-top: 1px solid #ccc;
       }
       footer span { float: right; font-style: italic; }
+
+      @media only screen and (max-width: 480px) {
+	body { font-size: 12px;}
+	header p { padding-left: 4.5em;}
+      }
     </style>
     <link href="css/print.css" rel="stylesheet" media="print">
-    <link href="css/portrait.css" rel="stylesheet" media="only screen and (orientation:portrait) and (max-width:480px)">
+    <!-- link href="css/portrait.css" rel="stylesheet" media="only screen and (orientation:portrait) and (max-width:480px)" -->
+
+
   </head>
 
   <body>
