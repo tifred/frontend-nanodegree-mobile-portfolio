@@ -421,9 +421,15 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-  // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-  function determineDx (elem, size) {
-    var oldwidth = elem.offsetWidth;
+  // Returns the size difference to change a pizza element from one size to another.
+  // Called by changePizzaSlices(size).
+
+  // FIRST OPTIMIZATION
+  // changed first parameter from elem to oldwidth.
+  // oldwidth can be calculated before running the determineDx function.
+
+  function determineDx (oldwidth, size) {
+    // ORIGINAL CODE: var oldwidth = elem.offsetWidth;
     var windowwidth = document.querySelector("#randomPizzas").offsetWidth;
     var oldsize = oldwidth / windowwidth;
 
@@ -447,8 +453,8 @@ var resizePizzas = function(size) {
     return dx;
   }
 
-  /* START ORIGINAL CODE:
-
+  /* START ORIGINAL CODE: */
+  /*
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
@@ -457,18 +463,23 @@ var resizePizzas = function(size) {
       document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
     }
   }
-  */ END ORIGINAL CODE
+  */
+  /* END ORIGINAL CODE */
 
-  /* START OPTIMIZATION */
-
+  /* START SECOND OPTIMIZATION */
   // Get all 100 random pizza containers.
   // They will be looped through shortly.
-  var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
+
+  // Replace querySelectorAll with getElementsByClassName, as it is faster.
+  // ORIGINAL: var randomPizzas = document.querySelectorAll(".randomPizzaContainer");
+  var randomPizzas = document.getElementsByClassName("randomPizzaContainer");
 
   // Determine new width using 1 element from randomPizzas.
   // They all have the same width, so one sample is enough.
-  var dx = determineDx(randomPizzas[1], size);
-  var newwidth = (randomPizzas[1].offsetWidth + dx) + 'px';
+  // Pass determineDx the oldwidth instead of entire element.
+  var oldwidth = randomPizzas[1].offsetWidth;
+  var dx = determineDx(oldwidth, size);
+  var newwidth = (oldwidth + dx) + 'px';
 
   // Now loop through all the randomPizzas and reset their width.
   function changePizzaSizes(size) {
@@ -476,7 +487,7 @@ var resizePizzas = function(size) {
       randomPizzas[i].style.width = newwidth;
     }
   }
-  /* END OPTIMIZATION */
+  /* END SECOND OPTIMIZATION */
 
   changePizzaSizes(size);
 
@@ -523,20 +534,26 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  /* START OPTIMIZATION */
-
+  /* START THIRD OPTIMIZATION */
   // Moved scrolltop calculation out of for loop.
   // This eliminated FSL upon scrolling the page and loading the page.
+  // Also replaced querySelectorAll with getElementsByClassName, as it is faster.
+  // Also replace "phase" variable with an array that holds all 5 possible values.
 
-  var items = document.querySelectorAll('.mover');
+  var items = document.getElementsByClassName('mover');
   var scrollTop = document.body.scrollTop / 1250;
 
-  for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin(scrollTop + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+  // New phase array to hold all 5 possible values.
+  var phase = [];
+  for (var j = 0; j < 5; j++) {
+    phase.push(Math.sin(scrollTop + (j % 5)));
   }
 
-  /* END OPTIMIZATION */
+  for (var i = 0; i < items.length; i++) {
+    // ORIGINAL: var phase = Math.sin(scrollTop + (i % 5));
+    items[i].style.left = items[i].basicLeft + 100 * phase[i] + 'px';
+  }
+  /* END THIRD OPTIMIZATION */
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
@@ -552,10 +569,12 @@ function updatePositions() {
 window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
+// OPTIMIZATION FOUR: only create 40 pizzas upon load, not 200.
+
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  for (var i = 0; i < 40; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
